@@ -1,4 +1,4 @@
-%%cu
+
 #include <iostream>
 using namespace std;
 
