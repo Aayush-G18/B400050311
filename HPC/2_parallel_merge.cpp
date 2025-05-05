@@ -76,7 +76,7 @@ void mergeSort(int arr[], int low, int high) {
 }
 
 int main() {
-    int n = 10;
+    long int n = 1e5;
     int arr[n];
     double start_time, end_time;
 
@@ -94,9 +94,17 @@ int main() {
     
     //Measure Parallel time
     start_time = omp_get_wtime(); 
-    parallelMergeSort(arr, 0, n - 1);
+    // parallelMergeSort(arr, 0, n - 1);
+     #pragma omp parallel
+    {
+      #pragma omp single nowait
+      parallelMergeSort(arr, 0, n-1);
+    }
     end_time = omp_get_wtime(); 
     cout << "Time taken by parallel algorithm: " << end_time - start_time << " seconds";
     
     return 0;
 }
+// Compile: g++ path/to/file/file_name.cpp -fopenmp
+
+// Execute: ./a.out [Linux] or ./a.exe [Windows]
