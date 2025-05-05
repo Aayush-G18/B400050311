@@ -11,29 +11,44 @@ void bubble(int array[], int n){
     }
 }
 
-void pBubble(int array[], int n){
-    //Sort odd indexed numbers
-    for(int i = 0; i < n; ++i){    
-        #pragma omp for
-        for (int j = 1; j < n; j += 2){
-        if (array[j] < array[j-1])
-        {
-          swap(array[j], array[j - 1]);
-        }
-    }
-
-    // Synchronize
-    #pragma omp barrier
-
-    //Sort even indexed numbers
-    #pragma omp for
-    for (int j = 2; j < n; j += 2){
-      if (array[j] < array[j-1])
-      {
-        swap(array[j], array[j - 1]);
+void pBubble(int array[], int n){  
+     #pragma omp parallel
+  {
+    for (int phase = 0; phase < n; ++phase) {
+      if (phase & 1) {
+        #pragma omp for nowait
+        for (int j = 1; j < n; j += 2)
+          if (array[j] < array[j-1]) swap(array[j], array[j-1]);
+      } else {
+        #pragma omp for nowait
+        for (int j = 2; j < n; j += 2)
+          if (array[j] < array[j-1]) swap(array[j], array[j-1]);
       }
+      #pragma omp barrier
     }
   }
+    //Sort odd indexed numbers
+    // for(int i = 0; i < n; ++i){    
+    //     #pragma omp for
+    //     for (int j = 1; j < n; j += 2){
+    //     if (array[j] < array[j-1])
+    //     {
+    //       swap(array[j], array[j - 1]);
+    //     }
+    // }
+
+    // Synchronize
+    // #pragma omp barrier
+
+    //Sort even indexed numbers
+//     #pragma omp for
+//     for (int j = 2; j < n; j += 2){
+//       if (array[j] < array[j-1])
+//       {
+//         swap(array[j], array[j - 1]);
+//       }
+//     }
+//   }
 }
 
 void printArray(int arr[], int n){
@@ -43,7 +58,7 @@ void printArray(int arr[], int n){
 
 int main(){
     // Set up variables
-    int n = 10;
+    int n = 1e5;
     int arr[n];
     int brr[n];
     double start_time, end_time;
@@ -56,7 +71,7 @@ int main(){
     bubble(arr, n);
     end_time = omp_get_wtime();     
     cout << "Sequential Bubble Sort took : " << end_time - start_time << " seconds.\n";
-    printArray(arr, n);
+    // printArray(arr, n);
     
     // Reset the array
     for(int i = 0, j = n; i < n; i++, j--) arr[i] = j;
@@ -66,5 +81,8 @@ int main(){
     pBubble(arr, n);
     end_time = omp_get_wtime();     
     cout << "Parallel Bubble Sort took : " << end_time - start_time << " seconds.\n";
-    printArray(arr, n);
+    // printArray(arr, n);
 }   
+// Compile: g++ path/to/file/file_name.cpp -fopenmp
+
+// Execute: ./a.out [Linux] or ./a.exe [Windows]
